@@ -147,7 +147,10 @@ public class cadastroVIEW extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
+        // Criar uma instância de listagemVIEW
         listagemVIEW listagem = new listagemVIEW();
+
+        // Tornar a janela de listagemVIEW visível
         listagem.setVisible(true);
     }//GEN-LAST:event_btnProdutosActionPerformed
 

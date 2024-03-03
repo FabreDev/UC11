@@ -1,5 +1,7 @@
 
-import java.util.ArrayList;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
 import javax.swing.table.DefaultTableModel;
 
 public class listagemVIEW extends javax.swing.JFrame {
@@ -9,7 +11,15 @@ public class listagemVIEW extends javax.swing.JFrame {
      */
     public listagemVIEW() {
         initComponents();
+        setLocationRelativeTo(null);
         listarProdutos();
+        addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+                // Chama o método para atualizar a tabela quando a janela ganhar foco
+                atualizarTabela();
+            }
+        });
     }
 
     /**
@@ -193,24 +203,26 @@ public class listagemVIEW extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void listarProdutos() {
-        try {
-            ProdutosDAO produtosdao = new ProdutosDAO();
+        DefaultTableModel model = (DefaultTableModel) listaProdutos.getModel();
+        model.setRowCount(0);
 
-            DefaultTableModel model = (DefaultTableModel) listaProdutos.getModel();
-            model.setNumRows(0);
+        // Certifique-se de ter uma lista válida de produtos a serem exibidos na tabela
+        List<ProdutosDTO> listaProdutos = obterListaProdutos();  // Substitua pelo seu método de obter a lista de produtos
 
-            ArrayList<ProdutosDTO> listagem = produtosdao.listarProdutos();
-
-            for (int i = 0; i < listagem.size(); i++) {
-                model.addRow(new Object[]{
-                    listagem.get(i).getId(),
-                    listagem.get(i).getNome(),
-                    listagem.get(i).getValor(),
-                    listagem.get(i).getStatus()
-                });
-            }
-        } catch (Exception e) {
+        for (ProdutosDTO produto : listaProdutos) {
+            Object[] row = {produto.getId(), produto.getNome(), produto.getValor(), produto.getStatus()};
+            model.addRow(row);
         }
+    }
 
+    private List<ProdutosDTO> obterListaProdutos() {
+        // Substitua este método pelo seu código para obter a lista de produtos do DAO ou de onde quer que você a obtenha.
+        // Exemplo fictício:
+        ProdutosDAO produtosDAO = new ProdutosDAO();
+        return produtosDAO.obterTodosOsProdutos();
+    }
+
+    public void atualizarTabela() {
+        listarProdutos();
     }
 }
