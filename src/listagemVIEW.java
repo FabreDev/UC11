@@ -1,10 +1,20 @@
 
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 public class listagemVIEW extends javax.swing.JFrame {
+
+    private int selectedProductId = -1;
 
     /**
      * Creates new form listagemVIEW
@@ -16,8 +26,46 @@ public class listagemVIEW extends javax.swing.JFrame {
         addWindowFocusListener(new WindowAdapter() {
             @Override
             public void windowGainedFocus(WindowEvent e) {
-                // Chama o método para atualizar a tabela quando a janela ganhar foco
                 atualizarTabela();
+            }
+        });
+        listaProdutos.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting()) {
+                    // Obtém o ID do produto da linha selecionada
+                    int selectedRow = listaProdutos.getSelectedRow();
+                    if (selectedRow != -1) {
+                        selectedProductId = (int) listaProdutos.getValueAt(selectedRow, 0);
+                        id_produto_venda.setText(String.valueOf(selectedProductId));
+
+                    }
+                }
+            }
+        });
+        id_produto_venda.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    selecionarLinhaPorIdDigitado();
+                }
+            }
+        });
+
+        id_produto_venda.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                selecionarLinhaPorIdDigitado();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                selecionarLinhaPorIdDigitado();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                selecionarLinhaPorIdDigitado();
             }
         });
     }
@@ -138,11 +186,20 @@ public class listagemVIEW extends javax.swing.JFrame {
 
     private void btnVenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVenderActionPerformed
         String id = id_produto_venda.getText();
+        if (selectedProductId == -1) {
+            // selecionar a linha com base no ID informado
+            try {
+                selectedProductId = Integer.parseInt(id);
+                selecionarLinhaPorId(selectedProductId);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Informe um ID válido para realizar a venda!", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+        }
 
-        ProdutosDAO produtosdao = new ProdutosDAO();
+        // Realiza a venda
+        venderProduto();
 
-        //produtosdao.venderProduto(Integer.parseInt(id));
-        listarProdutos();
     }//GEN-LAST:event_btnVenderActionPerformed
 
     private void btnVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVendasActionPerformed
@@ -182,10 +239,8 @@ public class listagemVIEW extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new listagemVIEW().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new listagemVIEW().setVisible(true);
         });
     }
 
@@ -206,8 +261,7 @@ public class listagemVIEW extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) listaProdutos.getModel();
         model.setRowCount(0);
 
-        // Certifique-se de ter uma lista válida de produtos a serem exibidos na tabela
-        List<ProdutosDTO> listaProdutos = obterListaProdutos();  // Substitua pelo seu método de obter a lista de produtos
+        List<ProdutosDTO> listaProdutos = obterListaProdutos();
 
         for (ProdutosDTO produto : listaProdutos) {
             Object[] row = {produto.getId(), produto.getNome(), produto.getValor(), produto.getStatus()};
@@ -216,13 +270,57 @@ public class listagemVIEW extends javax.swing.JFrame {
     }
 
     private List<ProdutosDTO> obterListaProdutos() {
-        // Substitua este método pelo seu código para obter a lista de produtos do DAO ou de onde quer que você a obtenha.
-        // Exemplo fictício:
         ProdutosDAO produtosDAO = new ProdutosDAO();
         return produtosDAO.obterTodosOsProdutos();
     }
 
     public void atualizarTabela() {
         listarProdutos();
+    }
+
+    private void selecionarLinhaPorId(int productId) {
+        DefaultTableModel model = (DefaultTableModel) listaProdutos.getModel();
+        for (int i = 0; i < model.getRowCount(); i++) {
+            if ((int) model.getValueAt(i, 0) == productId) {
+                listaProdutos.setRowSelectionInterval(i, i);
+                listaProdutos.requestFocus(); //focar na tabela após a seleção
+                break;
+            }
+        }
+    }
+
+    private void selecionarLinhaPorIdDigitado() {
+        String idText = id_produto_venda.getText().trim();
+
+        if (!idText.isEmpty()) {
+            try {
+                int productId = Integer.parseInt(idText);
+
+                SwingUtilities.invokeLater(() -> {
+                    selecionarLinhaPorId(productId);
+                });
+            } catch (NumberFormatException ex) {
+            }
+        }
+    }
+
+    private void venderProduto() {
+
+        if (selectedProductId != -1) {
+            ProdutosDAO produtosdao = new ProdutosDAO();
+
+            if (produtosdao.verificarVenda(selectedProductId)) {
+                JOptionPane.showMessageDialog(null, "Este produto já foi vendido!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            } else {
+                // realiza a venda
+                produtosdao.venderProduto(selectedProductId);
+                JOptionPane.showMessageDialog(null, "Venda realizada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                listarProdutos();
+            }
+            selectedProductId = -1;
+            id_produto_venda.setText("");
+        } else {
+            JOptionPane.showMessageDialog(null, "Selecione um produto para realizar a venda!", "Aviso", JOptionPane.WARNING_MESSAGE);
+        }
     }
 }

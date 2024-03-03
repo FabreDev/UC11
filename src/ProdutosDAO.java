@@ -15,7 +15,6 @@ public class ProdutosDAO {
     ArrayList<ProdutosDTO> listagem = new ArrayList<>();
 
     public void cadastrarProduto(ProdutosDTO produto) {
-
         if (inserirProduto(produto)) {
             JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
         } else {
@@ -24,7 +23,6 @@ public class ProdutosDAO {
     }
 
     public ArrayList<ProdutosDTO> listarProdutos() {
-
         return listagem;
     }
 
@@ -54,7 +52,7 @@ public class ProdutosDAO {
             prep = conn.prepareStatement(sql);
             resultset = prep.executeQuery();
 
-            listagem.clear(); // Limpar a lista existente
+            listagem.clear();
 
             while (resultset.next()) {
                 ProdutosDTO produto = new ProdutosDTO();
@@ -70,7 +68,42 @@ public class ProdutosDAO {
 
         } catch (SQLException ex) {
             System.out.println("Erro ao obter todos os produtos: " + ex.getMessage());
-            return null; // ou uma lista vazia, dependendo da sua lógica
+            return null;
+        } finally {
+            fecharConexao();
+        }
+    }
+
+    public boolean verificarVenda(int productId) {
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/uc11", "tutor", "Tutor123!");
+            String sql = "SELECT status FROM produtos WHERE id = ?";
+            prep = conn.prepareStatement(sql);
+            prep.setInt(1, productId);
+            resultset = prep.executeQuery();
+
+            if (resultset.next()) {
+                String status = resultset.getString("status");
+                return status.equals("Vendido");
+            }
+        } catch (SQLException ex) {
+            System.out.println("Erro ao verificar venda: " + ex.getMessage());
+        } finally {
+            fecharConexao();
+        }
+        return false;
+    }
+
+    public void venderProduto(int productId) {
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/uc11", "tutor", "Tutor123!");
+            String sql = "UPDATE produtos SET status = 'Vendido' WHERE id = ?";
+            prep = conn.prepareStatement(sql);
+            prep.setInt(1, productId);
+            prep.executeUpdate();
+            System.out.println("Produto vendido com sucesso!");
+        } catch (SQLException ex) {
+            System.out.println("Erro ao vender produto: " + ex.getMessage());
         } finally {
             fecharConexao();
         }
