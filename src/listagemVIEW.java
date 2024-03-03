@@ -185,7 +185,7 @@ public class listagemVIEW extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnVenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVenderActionPerformed
-        String id = id_produto_venda.getText();
+        /*String id = id_produto_venda.getText();
         if (selectedProductId == -1) {
             // selecionar a linha com base no ID informado
             try {
@@ -199,7 +199,7 @@ public class listagemVIEW extends javax.swing.JFrame {
 
         // Realiza a venda
         venderProduto();
-
+        */
     }//GEN-LAST:event_btnVenderActionPerformed
 
     private void btnVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVendasActionPerformed
