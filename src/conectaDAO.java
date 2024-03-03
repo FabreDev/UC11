@@ -8,15 +8,25 @@ public class conectaDAO {
 
     public Connection connectDB() {
         Connection conn = null;
-
         try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/uc11", "tutor", "Tutor123!");
+            System.out.println("Conexão estabelecida com o MySQL e com o banco de dados!");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/uc11?user=root&password=");
-
-        } catch (SQLException erro) {
-            JOptionPane.showMessageDialog(null, "Erro ConectaDAO" + erro.getMessage());
+        } catch (ClassNotFoundException ex) {
+            System.out.println("Driver do banco de dados não localizado!");
+        } catch (SQLException ex) {
+            System.out.println("Ocorreu um erro ao acessar o banco: " + ex.getMessage());
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                System.out.println("Erro ao fechar a conexão: " + ex.getMessage());
+            }
         }
-        return conn;
+        return null;
     }
 
 }

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import javax.swing.JOptionPane;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class ProdutosDAO {
 
@@ -14,7 +16,8 @@ public class ProdutosDAO {
 
     public void cadastrarProduto(ProdutosDTO produto) {
 
-        //conn = new conectaDAO().connectDB();
+        inserirProduto(produto);
+
     }
 
     public ArrayList<ProdutosDTO> listarProdutos() {
@@ -22,4 +25,33 @@ public class ProdutosDAO {
         return listagem;
     }
 
+    public void inserirProduto(ProdutosDTO produto) {
+        try {
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/uc11", "tutor", "Tutor123!");
+            String sql = "INSERT INTO produtos (nome, valor, status) VALUES (?, ?, ?)";
+            prep = conn.prepareStatement(sql);
+            prep.setString(1, produto.getNome());
+            prep.setInt(2, produto.getValor());
+            prep.setString(3, produto.getStatus());
+            prep.executeUpdate();
+            System.out.println("Produto inserido com sucesso!");
+        } catch (SQLException ex) {
+            System.out.println("Erro ao inserir produto: " + ex.getMessage());
+        } finally {
+            fecharConexao();
+        }
+    }
+
+    private void fecharConexao() {
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+            if (prep != null) {
+                prep.close();
+            }
+        } catch (SQLException ex) {
+            System.out.println("Erro ao fechar a conexão: " + ex.getMessage());
+        }
+    }
 }
