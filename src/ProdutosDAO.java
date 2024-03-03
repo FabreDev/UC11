@@ -34,7 +34,7 @@ public class ProdutosDAO {
             String sql = "INSERT INTO produtos (nome, valor, status) VALUES (?, ?, ?)";
             prep = conn.prepareStatement(sql);
             prep.setString(1, produto.getNome());
-            prep.setDouble(2, produto.getValor()); // Alteração do tipo de dado para double
+            prep.setDouble(2, produto.getValor());
             prep.setString(3, produto.getStatus());
             prep.executeUpdate();
             System.out.println("Produto inserido com sucesso!");
@@ -58,6 +58,7 @@ public class ProdutosDAO {
 
             while (resultset.next()) {
                 ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(resultset.getInt("id"));
                 produto.setNome(resultset.getString("nome"));
                 produto.setValor(resultset.getInt("valor"));
                 produto.setStatus(resultset.getString("status"));
