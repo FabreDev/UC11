@@ -16,8 +16,11 @@ public class ProdutosDAO {
 
     public void cadastrarProduto(ProdutosDTO produto) {
 
-        inserirProduto(produto);
-
+        if (inserirProduto(produto)) {
+            JOptionPane.showMessageDialog(null, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Erro ao cadastrar produto!", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public ArrayList<ProdutosDTO> listarProdutos() {
@@ -25,7 +28,7 @@ public class ProdutosDAO {
         return listagem;
     }
 
-    public void inserirProduto(ProdutosDTO produto) {
+    public boolean inserirProduto(ProdutosDTO produto) {
         try {
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/uc11", "tutor", "Tutor123!");
             String sql = "INSERT INTO produtos (nome, valor, status) VALUES (?, ?, ?)";
@@ -35,8 +38,10 @@ public class ProdutosDAO {
             prep.setString(3, produto.getStatus());
             prep.executeUpdate();
             System.out.println("Produto inserido com sucesso!");
+            return true;
         } catch (SQLException ex) {
             System.out.println("Erro ao inserir produto: " + ex.getMessage());
+            return false;
         } finally {
             fecharConexao();
         }
